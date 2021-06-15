@@ -1,3 +1,5 @@
+const sha256 = require('sha256');
+
 function Blockchain() {
     this.chain = [];
     //transactions in newTransactions aren't recorded until we create new block,
@@ -42,6 +44,15 @@ Blockchain.prototype.createNewTransaction = function(amount, sender, recipient) 
 
     //return number of block that this transaction will be added to
     return this.getLastBlock()['index'] + 1;
+}
+
+//pass block/data into method and return fixed length randomized string
+Blockchain.prototype.hashBlock = function(previousBlockHash, currentBlockData, nonce) {
+    //concat data intostring, JSONstringify turns currentBlockData into string
+    const dataAsString = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
+    //create hash using sha256 of concatinated data
+    const hash = sha256(dataAsString);
+    return hash;
 }
 
 //export constructor
