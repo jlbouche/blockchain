@@ -2,10 +2,11 @@ const sha256 = require('sha256');
 
 function Blockchain() {
     this.chain = [];
-    //transactions in newTransactions aren't recorded until we create new block,
-    //more like 'pending' until we use createNewBlock, so changed name to 
-    //pendingTransactions
     this.pendingTransactions = [];
+    //genesisblock is first block in block chain, so no 
+    //previousblockhash or proof/nonce/hash, so throwing in arbitrary vals below
+    //only okay for genesis block, otherwise blockchain won't work
+    this.createNewBlock(100, '0', '0')
 }
 
 Blockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash) {
@@ -69,6 +70,7 @@ Blockchain.prototype.proofOfWork = function(previousBlockHash, currentBlockData)
     // returns nonce value that creates correct hash
     return nonce;
 }
+
 
 //export constructor
 module.exports = Blockchain;
