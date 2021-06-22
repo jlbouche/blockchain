@@ -111,7 +111,15 @@ app.post('/register-and-broadcast-node', function(req,res){
 //only registers the node with each of the other nodes that
 //received the broadcast (no additional broadcasting)
 app.post('/register-node', function(req,res){
-
+    const newNodeUrl = req.body.newNodeUrl;
+    //if index of newnodeurl is -1 (nonexistent in network),
+    //then below variable is true, otherwise false
+    const nodeNotAlreadyPresent = bitcoin.networkNodes.indexOf(newNodeUrl) == -1;
+    const notCurrentNode = bitcoin.currentNodeUrl !== newNodeUrl;
+    //register new node with node we're currently on if nodeNotAlreadyPresent
+    //and if not the current node
+    if (nodeNotAlreadyPresent && notCurrentNode) bitcoin.networkNodes.push(newNodeUrl);
+    res.json({ note: 'New node registered successfully with node.' })
 })
 
 //register all the existing nodes that received broadcast
