@@ -5,6 +5,8 @@ const Blockchain = require('./blockchain');
 const uuid = require('uuid').v4;
 //port tells to go to 2nd arg in package.json scripts
 const port = process.argv[2];
+//request-promise library used in node register/broadcast
+const rp = require('request-promise');
 
 const nodeAddress = uuid().split('-').join('');
 
@@ -58,21 +60,63 @@ app.get('/mine', function(req, res){
         block: newBlock
     })
 })
-//hits one existing node then through that broadcasts creation
-//of new node to all other node endpoints
+//register-and-broadcast-node hits one existing node then through
+//that broadcasts creation of new node to all other existing node endpoints
 app.post('/register-and-broadcast-node', function(req,res){
     //pass in url to req.body
-    const newNodeUrl = req.body.newNodeUrl
+    const newNodeUrl = req.body.newNodeUrl;
+    //register node with url by pushing to networkNodes array
+    //only want to do if newNodeUrl isn't already in array (hence if stmt)
+    if (bitcoin.networkNodes.indexOf(newNodeUrl) == -1) bitcoin.networkNodes.push(newNodeUrl);
+
+    const regNodesPromises = [];
+
+    //want to hit register-node endpoint for each node
+    //already in array, using request-promise library
+    //making request to each other node through '/register-node'
+    bitcoin.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            //what url do we want to hit? all existing urls
+            uri: networkNodeUrl + '/register-node',
+            //define method we want to use--would be 'post'
+            method: 'POST',
+            //what data being passed to body? new url
+            body: { newNodeUrl: newNodeUrl},
+
+            json: true
+        };
+        //request-promising the above object
+        regNodesPromises.push(rp(requestOptions));
+    })
+    //because we don't know how long the above will take, we 
+    //make the below promise when above is fully complete (.all)
+    Promise.all(regNodesPromises)
+        .then(data => {
+            //have to hit register-nodes-bulk
+            const bulkRegisterOptions = {
+                uri: newNodeUrl + '/register-nodes-bulk',
+                method: 'POST',
+                //all existing nodes and current url
+                body: { allNetworkNodes: [...bitcoin.networkNodes, bitcoin.currentNodeUrl]},
+                json: true
+            }
+            return rp(bulkRegisterOptions);
+        })
+        .then(data => {
+            res.json({ note: 'New node registered with network successfully'})
+        })
 })
 
-//broadcast earlier transfers to this to send new node
-//url to all other existing nodes without rebroadcasting
+//since new node was already broadcasted above, register-node
+//only registers the node with each of the other nodes that
+//received the broadcast (no additional broadcasting)
 app.post('/register-node', function(req,res){
 
 })
 
-//register existing nodes with newly created node
-app.post('/register-nodes-bulk', function(req.res){
+//register all the existing nodes that received broadcast
+//with the newly created node
+app.post('/register-nodes-bulk', function(req,res){
 
 })
 
