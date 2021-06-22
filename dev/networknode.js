@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const Blockchain = require('./blockchain');
 const uuid = require('uuid').v4;
+//port tells to go to 2nd arg in package.json scripts
 const port = process.argv[2];
 
 const nodeAddress = uuid().split('-').join('');
@@ -56,6 +57,23 @@ app.get('/mine', function(req, res){
         note: "New block mined successfully",
         block: newBlock
     })
+})
+//hits one existing node then through that broadcasts creation
+//of new node to all other node endpoints
+app.post('/register-and-broadcast-node', function(req,res){
+    //pass in url to req.body
+    const newNodeUrl = req.body.newNodeUrl
+})
+
+//broadcast earlier transfers to this to send new node
+//url to all other existing nodes without rebroadcasting
+app.post('/register-node', function(req,res){
+
+})
+
+//register existing nodes with newly created node
+app.post('/register-nodes-bulk', function(req.res){
+
 })
 
 app.listen(port, function(){

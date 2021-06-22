@@ -1,12 +1,19 @@
 const sha256 = require('sha256');
+//refers to package.json urls in each node path
+const currentNodeUrl = process.argv[3];
 
 function Blockchain() {
     this.chain = [];
     this.pendingTransactions = [];
+
+    this.currentNodeUrl = currentNodeUrl;
+    //networknodes keeps all nodes aware of other nodes
+    this.networkNodes = [];
     //genesisblock is first block in block chain, so no 
     //previousblockhash or proof/nonce/hash, so throwing in arbitrary vals below
     //only okay for genesis block, otherwise blockchain won't work
     this.createNewBlock(100, '0', '0')
+
 }
 
 Blockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash) {
