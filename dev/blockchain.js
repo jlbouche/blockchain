@@ -40,7 +40,7 @@ Blockchain.prototype.createNewTransaction = function(amount, sender, recipient) 
         sender: sender,
         recipient: recipient,
     }
-    //push the newtransaction object into newtransactions array
+    //push the newtransaction object into pendingtransactions array
     this.pendingTransactions.push(newTransaction);
 
     //return number of block that this transaction will be added to
