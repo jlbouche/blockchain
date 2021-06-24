@@ -79,7 +79,7 @@ app.get('/mine', function(req, res){
     const requestPromises = [];
     bitcoin.networkNodes.forEach(networkNodeUrl => {
         const requestOptions = {
-            uri: networkNodeUrl + '/recieve-new-block',
+            uri: networkNodeUrl + '/receive-new-block',
             method: 'POST',
             body: { newBlock: newBlock },
             json: true
@@ -103,12 +103,35 @@ app.get('/mine', function(req, res){
 
         return rp(requestOptions);
     })
-
-    res.json({
-        note: "New block mined successfully",
-        block: newBlock
+    .then(data => {
+        res.json({
+            note: "New block mined successfully",
+            block: newBlock
+        })        
     })
 })
+
+app.post('/receive-new-block', function(req, res){
+    const newBlock = req.body.newBlock;
+    const lastBlock = bitcoin.getLastBlock();
+    const correctHash = lastBlock.hash === newBlock.previousBlockHash;
+    const correctIndex = lastBlock['index'] + 1 === newBlock['index'];
+
+    if (correctHash && correctIndex) {
+        bitcoin.chain.push(newBlock);
+        bitcoin.pendingTransactions = [];
+        res.json({
+            note: 'New block received and accepted.',
+            newBlock: newBlock
+        })
+    }  else {
+        res.json({ 
+            note: 'The block was rejected.',
+            newBlock: newBlock 
+    })
+    }
+})
+
 //register-and-broadcast-node hits one existing node then through
 //that broadcasts creation of new node to all other existing node endpoints
 app.post('/register-and-broadcast-node', function(req,res){
