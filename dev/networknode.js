@@ -77,7 +77,7 @@ app.post('/register-and-broadcast-node', function(req,res){
     bitcoin.networkNodes.forEach(networkNodeUrl => {
         const requestOptions = {
             //what url do we want to hit? all existing urls
-            uri: networkNodeUrl = '/register-node',
+            uri: networkNodeUrl + '/register-node',
             //define method we want to use--would be 'post'
             method: 'POST',
             //what data being passed to body? new url
@@ -93,7 +93,7 @@ app.post('/register-and-broadcast-node', function(req,res){
         .then(data => {
             //have to hit register-nodes-bulk
             const bulkRegisterOptions = {
-                uri: newNodeUrl + '/register-nodes',
+                uri: newNodeUrl + '/register-nodes-bulk',
                 method: 'POST',
                 //all existing nodes and current url
                 body: { allNetworkNodes: [...bitcoin.networkNodes, bitcoin.currentNodeUrl]},
@@ -124,7 +124,14 @@ app.post('/register-node', function(req,res){
 //register all the existing nodes that received broadcast
 //with the newly created node
 app.post('/register-nodes-bulk', function(req,res){
+    const allNetworkNodes = req.body.allNetworkNodes;
+    allNetworkNodes.forEach(networkNodeUrl => {
+        const nodeNotAlreadyPresent = bitcoin.networkNodes.indexOf(networkNodeUrl) == -1;
+        const notCurrentNode = bitcoin.currentNodeUrl !== networkNodeUrl;
+        if (nodeNotAlreadyPresent && notCurrentNode) bitcoin.networkNodes.push(networkNodeUrl);
+    });
 
+    res.json({ note: 'Bulk registration successful.' });
 })
 
 app.listen(port, function(){
