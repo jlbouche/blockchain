@@ -43,23 +43,19 @@ Blockchain.prototype.getLastBlock = function() {
 }
 
 Blockchain.prototype.createNewTransaction = function(amount, sender, recipient) {
-    const newTransaction = {
-        //data is same as passed into function
-        amount: amount,
-        sender: sender,
-        recipient: recipient,
-        //refactor to broadcast newtransactions to all nodes
-        transactionId: uuid().split('-').join('')
-    }
-    
+	const newTransaction = {
+		amount: amount,
+		sender: sender,
+		recipient: recipient,
+		transactionId: uuid().split('-').join('')
+	};
     return newTransaction;
-}
+};
 
 Blockchain.prototype.addTransactionToPendingTransactions = function(transactionObj) {
-    this.pendingTransactions.push(transactionObj);
-
-    return this.getLastBlock()['index'] + 1;
-}
+	this.pendingTransactions.push(transactionObj);
+	return this.getLastBlock()['index'] + 1;
+};
 
 //pass block/data into method and return fixed length randomized string
 Blockchain.prototype.hashBlock = function(previousBlockHash, currentBlockData, nonce) {
