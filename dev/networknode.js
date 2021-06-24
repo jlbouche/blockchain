@@ -26,6 +26,30 @@ app.post('/transaction', function (req, res) {
     res.json({ note: `Transaction will be added in block ${blockIndex}.`})
 })
 
+//create new transaction and broadcast to all nodes in network
+app.post('/transaction/broadcast', function (req, res){
+    const newTransaction = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
+    bitcoin.addTransactionToPendingTransactions(newTransaction);
+
+    const requestPromises = [];
+    //broadcast through forEach
+    bitcoin.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/transaction',
+            method: 'POST',
+            data: newTransaction,
+            json: true
+        }
+
+        requestPromises.push(rp(requestOptions));
+    });
+
+    Promise.all(requestPromises)
+        .then(data => {
+            res.json({ note: 'Transaction created and broadcast successfully.' });
+        })
+})
+
 //create new block
 app.get('/mine', function(req, res){
     //because createNewBlock has 3 params, have to define these params below
