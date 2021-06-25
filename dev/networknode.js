@@ -254,6 +254,22 @@ app.get('/consensus', function(req, res){
     })
 })
 
+//send specific block hash and return block it corresponds to
+app.get('/block/:blockHash', function(req, res){
+    
+})
+
+//send transactionId and return transaction it corresponds to
+app.get('/transaction/:transactionId', function(req, res){
+
+})
+
+//send specific address and return all transactions made
+//from this address
+app.get('/address/:address', function(req, res){
+
+})
+
 app.listen(port, function(){
     console.log(`Listening on port ${port}...`);
 })
